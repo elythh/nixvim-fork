@@ -8,11 +8,13 @@ nixvim.vim-plugin.mkVimPlugin {
   maintainers = [ lib.maintainers.elythh ];
 
   settingsOptions = {
-    mapping = mkOption {
+    default_mappings = mkNullBool true;
+
+    keys = mkOption {
       default = { };
       type = with helpers.nixvimTypes; maybeRaw (attrsOf strLua);
       description = ''
-        cmp mappings declaration.
+        visual-multi mappings declaration.
         See `:h visual-multi` for more information.
       '';
       apply =
