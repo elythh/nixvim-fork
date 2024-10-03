@@ -24,9 +24,6 @@
 
       brokenTools =
         [
-          # Broken as of 2024-07-08
-          # TODO: re-enable this tests when fixed
-          "cpplint"
           # TODO: added 2024-09-13
           # Swift broken everywhere atm
           "swiftformat"
@@ -42,6 +39,15 @@
           # TODO: re-enable those tests when fixed
           "chktex"
           "latexindent"
+          # TODO: added 2024-10-01 re-enable when fixed
+          # broken https://github.com/NixOS/nixpkgs/issues/345331
+          "php"
+          "phan"
+          "phpstan"
+          "psalm"
+          "phpcbf"
+          "php_cs_fixer"
+          "phpcs"
         ]
         ++ lib.optionals (system == "x86_64-darwin") [
           # As of 2024-07-31, dmd is broken on x86_64-darwin
