@@ -4,6 +4,7 @@
 
     ./colorschemes/ayu.nix
     ./colorschemes/base16
+    ./colorschemes/base46
     ./colorschemes/catppuccin.nix
     ./colorschemes/cyberdream.nix
     ./colorschemes/dracula-nvim.nix
