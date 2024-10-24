@@ -208,7 +208,7 @@ let
     nixvimOptions = mapModulesToString (
       name: opts:
       let
-        isBranch = if name == "index" then true else opts.hasComponents && opts.index.options != { };
+        isBranch = name == "index" || (opts.hasComponents && opts.index.options != { });
 
         path =
           if isBranch then
@@ -218,12 +218,41 @@ let
           else
             "";
 
-        indentLevel = with builtins; length (filter isString (split "/" opts.index.path)) - 1;
+        indentLevel = lib.count (c: c == "/") (lib.stringToCharacters opts.index.path);
 
-        padding = lib.concatStrings (builtins.genList (_: "\t") indentLevel);
+        padding = lib.strings.replicate indentLevel "\t";
       in
       "${padding}- [${name}](${path})"
     ) docs.modules;
+
+    wrapperOptionFiles = lib.mapAttrs' (name: options: {
+      name = options.meta.wrapper.name.value;
+      # TODO:
+      # value.path = "./modules/${name}.md";
+      value.file = mkMDDoc options;
+    }) wrapperOptions;
+
+    wrapperOptionDocs =
+      pkgs.runCommandNoCCLocal "wrapper-option-doc"
+        {
+          __structuredAttrs = true;
+          files = lib.mapAttrs (name: value: value.file) mdbook.wrapperOptionFiles;
+          # TODO:
+          # paths = lib.mapAttrs (name: value: value.path) mdbook.wrapperOptionFiles;
+        }
+        ''
+          for name in "''${!files[@]}"
+          do
+            # $file contains the docs built by mkMDDoc
+            file="''${files[$name]}"
+            # TODO: consider putting wrapper docs in separate files:
+            # path="''${paths[$name]}"
+            echo >> "$out"
+            echo "## $name" >> "$out"
+            echo >> "$out"
+            cat "$file" >> $out
+          done
+        '';
   };
 
   wrapperOptions =
@@ -266,9 +295,7 @@ let
       --replace-fail "@NIXVIM_OPTIONS@" "$(cat ${pkgs.writeText "nixvim-options-summary.md" mdbook.nixvimOptions})"
 
     substituteInPlace ./modules/wrapper-options.md \
-      --replace-fail "@NIXOS_OPTIONS@" "$(cat ${mkMDDoc wrapperOptions.nixos})" \
-      --replace-fail "@HM_OPTIONS@" "$(cat ${mkMDDoc wrapperOptions.hm})" \
-      --replace-fail "@DARWIN_OPTIONS@" "$(cat ${mkMDDoc wrapperOptions.darwin})"
+      --replace-fail "@WRAPPER_OPTIONS@" "$(cat ${mdbook.wrapperOptionDocs})"
   '';
 in
 pkgs.stdenv.mkDerivation {
