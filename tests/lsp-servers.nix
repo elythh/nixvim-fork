@@ -37,7 +37,20 @@ let
     }:
     let
       disabled =
-        lib.optionals pkgs.stdenv.isDarwin [
+        [
+          # DEPRECATED SERVERS
+          # See https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig.lua
+          "ruff_lsp"
+          "bufls"
+          "typst_lsp"
+          # Package ‘dotnet-core-combined’ is marked as insecure, refusing to evaluate.
+          # Dotnet SDK 6.0.428 is EOL, please use 8.0 (LTS) or 9.0 (Current)
+          # https://github.com/NixOS/nixpkgs/pull/358533
+          "dafny"
+          "fsautocomplete"
+          "omnisharp"
+        ]
+        ++ lib.optionals pkgs.stdenv.isDarwin [
           "fsautocomplete"
         ]
         ++ lib.optionals pkgs.stdenv.isAarch64 [
@@ -49,10 +62,6 @@ let
           "starpls"
           # TODO: 2024-10-05 build failure
           "fstar"
-        ]
-        ++ lib.optionals (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") [
-          # TODO: 2024-11-10 fixed in https://github.com/NixOS/nixpkgs/pull/355032
-          "lua-language-server"
         ]
         ++ lib.optionals (pkgs.stdenv.hostPlatform.system == "x86_64-darwin") [
           # Binary package not available for this architecture

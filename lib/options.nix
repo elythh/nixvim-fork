@@ -333,5 +333,53 @@ rec {
         else
           example;
     };
+
+  mkLazyLoadOption =
+    name:
+    lib.mkOption {
+      description = ''
+        Lazy-load settings for ${name}.
+
+        > [!WARNING]
+        > This is an experimental option and may not work as expected with all plugins.
+        > The API may change without notice.
+        > Please report any issues you encounter.
+      '';
+      default = { };
+      type = types.submodule (
+        { config, ... }:
+        {
+          options = {
+            enable = lib.mkOption {
+              default = lib.any (x: x != null) (builtins.attrValues config.settings);
+              defaultText = lib.literalMD ''
+                `true` when `settings` has a non-null attribute
+              '';
+              description = ''
+                lazy-loading for ${name}
+              '';
+            };
+
+            settings = lib.nixvim.mkSettingsOption {
+              description = ''
+                Lazy provider configuration settings.
+
+                Check your lazy loading provider's documentation on settings to configure.
+              '';
+              example = {
+                cmd = "Neotest";
+                keys = [
+                  {
+                    __unkeyed-1 = "<leader>nt";
+                    __unkeyed-3 = "<CMD>Neotest summary<CR>";
+                    desc = "Summary toggle";
+                  }
+                ];
+              };
+            };
+          };
+        }
+      );
+    };
 }
 // removed
